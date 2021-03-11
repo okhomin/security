@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  server:
+    depends_on:
+      - postgres
+    build:
+      context: ./
+      dockerfile: ./cmd/Dockerfile
+    ports:
+    - 8080:8080
+
+  postgres:
+    image: "postgres:alpine"
+    environment:
+      POSTGRES_PASSWORD: "postgres" # TODO: change to config
