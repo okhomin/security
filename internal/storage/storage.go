@@ -4,18 +4,42 @@ import (
 	"context"
 	"errors"
 
-	"github.com/okhomin/security/internal/models"
+	"github.com/okhomin/security/internal/models/group"
+
+	"github.com/okhomin/security/internal/models/file"
+
+	"github.com/okhomin/security/internal/models/user"
 )
 
 var (
-	ErrNotExist     = errors.New("user doesn't exist")
-	ErrAlreadyExist = errors.New("user already exist")
+	ErrUserNotExist      = errors.New("user doesn't exist")
+	ErrUserAlreadyExist  = errors.New("user already exist")
+	ErrFileNotExist      = errors.New("file doesn't exist")
+	ErrFileAlreadyExist  = errors.New("file already exist")
+	ErrGroupNotExist     = errors.New("group doesn't exist")
+	ErrGroupAlreadyExist = errors.New("group already exist")
 )
 
-type Writer interface {
-	AddUser(ctx context.Context, user models.User) (*models.User, error)
+type UserWriter interface {
+	CreateUser(ctx context.Context, user user.User) (*user.User, error)
 }
 
-type Reader interface {
-	User(ctx context.Context, login []byte) (*models.User, error)
+type UserReader interface {
+	User(ctx context.Context, login []byte) (*user.User, error)
+}
+
+type FileWriter interface {
+	CreateFile(ctx context.Context, file file.File) (*file.File, error)
+}
+
+type FileReader interface {
+	File(ctx context.Context, name []byte) (*file.File, error)
+}
+
+type GroupWriter interface {
+	CreateGroup(ctx context.Context, group group.Group) (*group.Group, error)
+}
+
+type GroupReader interface {
+	Group(ctx context.Context, name string) (*group.Group, error)
 }

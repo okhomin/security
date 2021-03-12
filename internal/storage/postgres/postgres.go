@@ -3,9 +3,13 @@ package postgres
 import (
 	"context"
 
-	"github.com/okhomin/security/internal/storage"
+	"github.com/okhomin/security/internal/models/group"
 
-	"github.com/okhomin/security/internal/models"
+	"github.com/okhomin/security/internal/models/file"
+
+	"github.com/okhomin/security/internal/models/user"
+
+	"github.com/okhomin/security/internal/storage"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -50,15 +54,16 @@ func migrateDatabase(ctx context.Context, conn *pgx.Conn) error {
 	return nil
 }
 
-const getUserQuery = `
-SELECT id, login, password FROM users WHERE login = $1;
+const createGroupQuery = `
+INSERT INTO groups (name, read, write, users) VALUES ($1, $2, $3, ARRAY(SELECT id FROM users WHERE login = ANY ($4)))
+ON CONFLICT DO NOTHING RETURNING id, name, read, write, users;
 `
 
-func (p *Postgres) User(ctx context.Context, login []byte) (*models.User, error) {
-	result := new(models.User)
-	if err := p.db.QueryRow(ctx, getUserQuery, login).Scan(&result.ID, &result.Login, &result.Password); err != nil {
+func (p *Postgres) CreateGroup(ctx context.Context, g group.Group) (*group.Group, error) {
+	result := new(group.Group)
+	if err := p.db.QueryRow(ctx, createGroupQuery, g.Name, g.Read, g.Write, g.Users).Scan(&result.ID, &result.Name, &result.Read, &result.Write, &result.Users); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, storage.ErrNotExist
+			return nil, storage.ErrGroupAlreadyExist
 		}
 		return nil, err
 	}
@@ -66,17 +71,81 @@ func (p *Postgres) User(ctx context.Context, login []byte) (*models.User, error)
 	return result, nil
 }
 
-const addUserQuery = `
+const getGroupQuery = `
+SELECT id, name, read, write, users FROM groups WHERE name = $1;
+`
+
+func (p *Postgres) Group(ctx context.Context, name string) (*group.Group, error) {
+	result := new(group.Group)
+	if err := p.db.QueryRow(ctx, getGroupQuery, name).Scan(&result.ID, &result.Name, &result.Read, &result.Write, &result.Users); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, storage.ErrGroupNotExist
+		}
+		return nil, err
+	}
+
+	return result, nil
+}
+
+const getUserQuery = `
+SELECT id, login, password FROM users WHERE login = $1;
+`
+
+func (p *Postgres) User(ctx context.Context, login []byte) (*user.User, error) {
+	result := new(user.User)
+	if err := p.db.QueryRow(ctx, getUserQuery, login).Scan(&result.ID, &result.Login, &result.Password); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, storage.ErrUserNotExist
+		}
+		return nil, err
+	}
+
+	return result, nil
+}
+
+const createUserQuery = `
 INSERT INTO users (login, password) VALUES ($1, $2)
 ON CONFLICT DO NOTHING RETURNING id, login, password;
 `
 
-func (p *Postgres) AddUser(ctx context.Context, user models.User) (*models.User, error) {
-	result := new(models.User)
-
-	if err := p.db.QueryRow(ctx, addUserQuery, user.Login, user.Password).Scan(&result.ID, &result.Login, &result.Password); err != nil {
+func (p *Postgres) CreateUser(ctx context.Context, u user.User) (*user.User, error) {
+	result := new(user.User)
+	if err := p.db.QueryRow(ctx, createUserQuery, u.Login, u.Password).Scan(&result.ID, &result.Login, &result.Password); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, storage.ErrAlreadyExist
+			return nil, storage.ErrUserAlreadyExist
+		}
+		return nil, err
+	}
+
+	return result, nil
+}
+
+const getFileQuery = `
+SELECT id, mode, name, content, groups FROM files WHERE name = $1;
+`
+
+func (p *Postgres) File(ctx context.Context, name []byte) (*file.File, error) {
+	result := new(file.File)
+	if err := p.db.QueryRow(ctx, getFileQuery, name).Scan(&result.ID, &result.Mode, &result.Name, &result.Content, &result.Groups); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, storage.ErrFileNotExist
+		}
+		return nil, err
+	}
+
+	return result, nil
+}
+
+const createFileQuery = `
+INSERT INTO files (mode, name, content, groups) VALUES ($1, $2, $3, $4)
+ON CONFLICT DO NOTHING RETURNING id, mode, name, content, groups;
+`
+
+func (p *Postgres) CreateFile(ctx context.Context, f file.File) (*file.File, error) {
+	result := new(file.File)
+	if err := p.db.QueryRow(ctx, createFileQuery, f.Mode, f.Name, f.Content, f.Groups).Scan(&result.ID, &result.Mode, &result.Name, &result.Content, &result.Groups); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, storage.ErrFileAlreadyExist
 		}
 		return nil, err
 	}

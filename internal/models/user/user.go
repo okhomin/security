@@ -1,4 +1,4 @@
-package models
+package user
 
 type User struct {
 	ID       string
@@ -6,7 +6,7 @@ type User struct {
 	Password string
 }
 
-func NewUser(login, password string) *User {
+func New(login, password string) *User {
 	return &User{
 		Login:    login,
 		Password: password,
