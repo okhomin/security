@@ -110,10 +110,30 @@ ON CONFLICT DO NOTHING RETURNING id, login, password;
 
 func (p *Postgres) CreateUser(ctx context.Context, u user.User) (*user.User, error) {
 	result := new(user.User)
-	if err := p.db.QueryRow(ctx, createUserQuery, u.Login, u.Password).Scan(&result.ID, &result.Login, &result.Password); err != nil {
+	tx, err := p.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.QueryRow(ctx, createUserQuery, u.Login, u.Password).Scan(&result.ID, &result.Login, &result.Password); err != nil {
+		if err := tx.Rollback(ctx); err != nil {
+			return nil, err
+		}
 		if err == pgx.ErrNoRows {
 			return nil, storage.ErrUserAlreadyExist
 		}
+		return nil, err
+	}
+	if _, err := tx.Exec(ctx, createGroupQuery, u.Login, true, true, []string{u.Login}); err != nil {
+		if err := tx.Rollback(ctx); err != nil {
+			return nil, err
+		}
+		if err == pgx.ErrNoRows {
+			return nil, storage.ErrGroupAlreadyExist
+		}
+		return nil, err
+	}
+	if err := tx.Commit(ctx); err != nil {
 		return nil, err
 	}
 
