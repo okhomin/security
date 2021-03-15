@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/okhomin/security/internal/models/file"
+
 	"github.com/okhomin/security/internal/models/group"
 
 	"github.com/okhomin/security/internal/hash/bcrypt"
@@ -31,4 +33,13 @@ func main() {
 		Users: []string{"login0", "login1", "test"},
 	}))
 	log.Println(db.Permissions(context.TODO(), "hello", "12a33cbb-d7b8-47bd-bcb9-8614e1e92089"))
+	log.Println(db.CreateFile(context.TODO(), file.File{
+		Name:    "hello2",
+		Content: "Byte, byte",
+		Groups:  []string{"7076a832-62e8-4b50-956c-f7e000b527d2"},
+	}))
+	files, _ := db.FilesInfos(context.TODO())
+	for _, v := range files {
+		log.Println(v.Name)
+	}
 }

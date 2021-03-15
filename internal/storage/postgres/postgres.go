@@ -141,12 +141,12 @@ func (p *Postgres) CreateUser(ctx context.Context, u user.User) (*user.User, err
 }
 
 const getFileQuery = `
-SELECT id, mode, name, content, groups FROM files WHERE name = $1;
+SELECT id, name, content, groups FROM files WHERE name = $1;
 `
 
 func (p *Postgres) File(ctx context.Context, name string) (*file.File, error) {
 	result := new(file.File)
-	if err := p.db.QueryRow(ctx, getFileQuery, name).Scan(&result.ID, &result.Mode, &result.Name, &result.Content, &result.Groups); err != nil {
+	if err := p.db.QueryRow(ctx, getFileQuery, name).Scan(&result.ID, &result.Name, &result.Content, &result.Groups); err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, storage.ErrFileNotExist
 		}
@@ -156,7 +156,7 @@ func (p *Postgres) File(ctx context.Context, name string) (*file.File, error) {
 	return result, nil
 }
 
-const canReadQuery = `
+const permissionsFileQuery = `
 SELECT g.read, g.write FROM groups AS g WHERE 
 EXISTS (SELECT 1 FROM files AS f WHERE g.id = ANY (f.groups) AND f.name = $1)
 AND $2 = any (g.users);
@@ -164,7 +164,7 @@ AND $2 = any (g.users);
 
 func (p *Postgres) Permissions(ctx context.Context, name, id string) (bool, bool, error) {
 	var read, write bool
-	if err := p.db.QueryRow(ctx, canReadQuery, name, id).Scan(&read, &write); err != nil {
+	if err := p.db.QueryRow(ctx, permissionsFileQuery, name, id).Scan(&read, &write); err != nil {
 		if err == pgx.ErrNoRows {
 			return false, false, storage.ErrFileNotExist
 		}
@@ -174,14 +174,37 @@ func (p *Postgres) Permissions(ctx context.Context, name, id string) (bool, bool
 	return read, write, nil
 }
 
+const infosFilesQuery = `
+SELECT id, name, groups FROM files;
+`
+
+func (p *Postgres) FilesInfos(ctx context.Context) ([]*file.File, error) {
+	result := make([]*file.File, 0, 10)
+	rows, err := p.db.Query(ctx, infosFilesQuery)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		f := new(file.File)
+		if err := rows.Scan(&f.ID, &f.Name, &f.Groups); err != nil {
+			return nil, err
+		}
+
+		result = append(result, f)
+	}
+
+	return result, nil
+}
+
 const createFileQuery = `
-INSERT INTO files (mode, name, content, groups) VALUES ($1, $2, $3, $4)
-ON CONFLICT DO NOTHING RETURNING id, mode, name, content, groups;
+INSERT INTO files (name, content, groups) VALUES ($1, $2, $3)
+ON CONFLICT DO NOTHING RETURNING id, name, content, groups;
 `
 
 func (p *Postgres) CreateFile(ctx context.Context, f file.File) (*file.File, error) {
 	result := new(file.File)
-	if err := p.db.QueryRow(ctx, createFileQuery, f.Mode, f.Name, f.Content, f.Groups).Scan(&result.ID, &result.Mode, &result.Name, &result.Content, &result.Groups); err != nil {
+	if err := p.db.QueryRow(ctx, createFileQuery, f.Name, f.Content, f.Groups).Scan(&result.ID, &result.Name, &result.Content, &result.Groups); err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, storage.ErrFileAlreadyExist
 		}

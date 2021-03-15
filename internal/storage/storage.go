@@ -34,8 +34,8 @@ type FileWriter interface {
 
 type FileReader interface {
 	File(ctx context.Context, name string) (*file.File, error)
+	FilesInfos(ctx context.Context) ([]*file.File, error)
 	Permissions(ctx context.Context, name, id string) (bool, bool, error)
-	//CanWrite(ctx context.Context, name, login string) (bool, error)
 }
 
 type GroupWriter interface {
