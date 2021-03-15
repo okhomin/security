@@ -25,7 +25,7 @@ type UserWriter interface {
 }
 
 type UserReader interface {
-	User(ctx context.Context, login []byte) (*user.User, error)
+	User(ctx context.Context, login string) (*user.User, error)
 }
 
 type FileWriter interface {
@@ -33,7 +33,9 @@ type FileWriter interface {
 }
 
 type FileReader interface {
-	File(ctx context.Context, name []byte) (*file.File, error)
+	File(ctx context.Context, name string) (*file.File, error)
+	Permissions(ctx context.Context, name, id string) (bool, bool, error)
+	//CanWrite(ctx context.Context, name, login string) (bool, error)
 }
 
 type GroupWriter interface {

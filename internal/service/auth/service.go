@@ -29,7 +29,7 @@ func New(hasher hash.Hasher, writer storage.UserWriter, reader storage.UserReade
 	}
 }
 
-func (s *Service) Login(ctx context.Context, password, login []byte) (*user.User, error) {
+func (s *Service) Login(ctx context.Context, password, login string) (*user.User, error) {
 	user, err := s.reader.User(ctx, login)
 	if err == storage.ErrUserNotExist {
 		return nil, ErrInvalidLoginOrPassword
@@ -38,7 +38,7 @@ func (s *Service) Login(ctx context.Context, password, login []byte) (*user.User
 		return nil, err
 	}
 
-	valid, err := s.hasher.Compare([]byte(user.Password), password)
+	valid, err := s.hasher.Compare([]byte(user.Password), []byte(password))
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +49,8 @@ func (s *Service) Login(ctx context.Context, password, login []byte) (*user.User
 	return user, nil
 }
 
-func (s *Service) Signup(ctx context.Context, password, login []byte) (*user.User, error) {
-	hashedPassword, err := s.hasher.Generate(password)
+func (s *Service) Signup(ctx context.Context, password, login string) (*user.User, error) {
+	hashedPassword, err := s.hasher.Generate([]byte(password))
 	if err != nil {
 		return nil, err
 	}

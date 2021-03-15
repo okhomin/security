@@ -91,7 +91,7 @@ const getUserQuery = `
 SELECT id, login, password FROM users WHERE login = $1;
 `
 
-func (p *Postgres) User(ctx context.Context, login []byte) (*user.User, error) {
+func (p *Postgres) User(ctx context.Context, login string) (*user.User, error) {
 	result := new(user.User)
 	if err := p.db.QueryRow(ctx, getUserQuery, login).Scan(&result.ID, &result.Login, &result.Password); err != nil {
 		if err == pgx.ErrNoRows {
@@ -144,7 +144,7 @@ const getFileQuery = `
 SELECT id, mode, name, content, groups FROM files WHERE name = $1;
 `
 
-func (p *Postgres) File(ctx context.Context, name []byte) (*file.File, error) {
+func (p *Postgres) File(ctx context.Context, name string) (*file.File, error) {
 	result := new(file.File)
 	if err := p.db.QueryRow(ctx, getFileQuery, name).Scan(&result.ID, &result.Mode, &result.Name, &result.Content, &result.Groups); err != nil {
 		if err == pgx.ErrNoRows {
@@ -154,6 +154,24 @@ func (p *Postgres) File(ctx context.Context, name []byte) (*file.File, error) {
 	}
 
 	return result, nil
+}
+
+const canReadQuery = `
+SELECT g.read, g.write FROM groups AS g WHERE 
+EXISTS (SELECT 1 FROM files AS f WHERE g.id = ANY (f.groups) AND f.name = $1)
+AND $2 = any (g.users);
+`
+
+func (p *Postgres) Permissions(ctx context.Context, name, id string) (bool, bool, error) {
+	var read, write bool
+	if err := p.db.QueryRow(ctx, canReadQuery, name, id).Scan(&read, &write); err != nil {
+		if err == pgx.ErrNoRows {
+			return false, false, storage.ErrFileNotExist
+		}
+		return false, false, err
+	}
+
+	return read, write, nil
 }
 
 const createFileQuery = `

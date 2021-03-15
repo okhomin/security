@@ -22,10 +22,7 @@ func main() {
 	db := postgres.New(context.TODO(), dbURL)
 	hasher := bcrypt.New([]byte(pepper), cost)
 	svc := auth.New(hasher, db, db)
-	log.Println(svc.Signup(context.TODO(), []byte("password"), []byte("login3")))
-	log.Println(svc.Signup(context.TODO(), []byte("password"), []byte("login2")))
-	log.Println(svc.Signup(context.TODO(), []byte("password"), []byte("login1")))
-	log.Println(svc.Signup(context.TODO(), []byte("password"), []byte("login0")))
+	log.Println(svc.Signup(context.TODO(), "password", "login3"))
 
 	log.Println(db.CreateGroup(context.TODO(), group.Group{
 		Name:  "hello",
@@ -33,4 +30,5 @@ func main() {
 		Write: false,
 		Users: []string{"login0", "login1", "test"},
 	}))
+	log.Println(db.Permissions(context.TODO(), "hello", "12a33cbb-d7b8-47bd-bcb9-8614e1e92089"))
 }
