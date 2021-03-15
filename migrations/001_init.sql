@@ -15,7 +15,16 @@ CREATE TABLE files
     id      uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name    TEXT   NOT NULL UNIQUE,
     content TEXT   NOT NULL,
-    groups  uuid[] NOT NULL
+    groups  uuid[] NOT NULL,
+    acls    uuid[] NOT NULL
+);
+
+CREATE TABLE acls
+(
+    id      uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id uuid REFERENCES users (id),
+    read    BOOLEAN NOT NULL,
+    write   BOOLEAN NOT NULL
 );
 
 CREATE TABLE groups
@@ -39,6 +48,7 @@ BEGIN;
 
 DROP TABLE users;
 DROP TABLE files;
+DROP TABLE acls;
 DROP EXTENSION IF EXISTS "uuid-ossp";
 
 COMMIT;

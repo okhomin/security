@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/okhomin/security/internal/models/acl"
+
 	"github.com/okhomin/security/internal/models/group"
 
 	"github.com/okhomin/security/internal/models/file"
@@ -30,12 +32,14 @@ type UserReader interface {
 
 type FileWriter interface {
 	CreateFile(ctx context.Context, file file.File) (*file.File, error)
+	UpdateFile(ctx context.Context, file file.File) (*file.File, error)
 }
 
 type FileReader interface {
 	File(ctx context.Context, name string) (*file.File, error)
 	FilesInfos(ctx context.Context) ([]*file.File, error)
-	Permissions(ctx context.Context, name, id string) (bool, bool, error)
+	FileGroupPermissions(ctx context.Context, name, id string) (bool, bool, error)
+	FileAclPermissions(ctx context.Context, name, id string) (bool, bool, error)
 }
 
 type GroupWriter interface {
@@ -44,4 +48,12 @@ type GroupWriter interface {
 
 type GroupReader interface {
 	Group(ctx context.Context, name string) (*group.Group, error)
+}
+
+type AclWriter interface {
+	CreateAcl(ctx context.Context, acl acl.Acl) (*acl.Acl, error)
+}
+
+type AclReader interface {
+	Acl(ctx context.Context, id string) (*acl.Acl, error)
 }

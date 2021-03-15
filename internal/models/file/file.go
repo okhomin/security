@@ -5,4 +5,5 @@ type File struct {
 	Name    string
 	Content string
 	Groups  []string
+	Acls    []string
 }
