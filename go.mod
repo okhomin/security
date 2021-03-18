@@ -3,6 +3,7 @@ module github.com/okhomin/security
 go 1.16
 
 require (
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jackc/pgx/v4 v4.10.1 // indirect
 	github.com/jackc/tern v1.12.4 // indirect
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
