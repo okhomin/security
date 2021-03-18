@@ -2,10 +2,6 @@ package server
 
 import "net/http"
 
-func (s *Server) ListAcls(w http.ResponseWriter, h *http.Request) {
-
-}
-
 func (s *Server) CreateAcl(w http.ResponseWriter, h *http.Request) {
 
 }

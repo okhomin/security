@@ -11,15 +11,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/okhomin/security/internal/config"
-	"github.com/okhomin/security/internal/service/auth"
+	"github.com/okhomin/security/internal/service/auther"
 )
 
 type Server struct {
 	router *mux.Router
-	auther auth.Auther
+	auther auther.Auther
 }
 
-func New(auther auth.Auther) *Server {
+func New(auther auther.Auther) *Server {
 	return &Server{
 		auther: auther,
 	}
@@ -41,10 +41,10 @@ func (s *Server) Setup() {
 	s.router.HandleFunc("/group/{id}", s.UpdateGroup).Methods(http.MethodPut)
 	s.router.HandleFunc("/group", s.CreateGroup).Methods(http.MethodPost)
 
-	s.router.HandleFunc("/file/{id}/acls", s.ListAcls).Methods(http.MethodGet)
-	s.router.HandleFunc("/file/{id}/acl", s.UpdateAcl).Methods(http.MethodPut)
-	s.router.HandleFunc("/file/{id}/acl", s.DeleteAcl).Methods(http.MethodDelete)
-	s.router.HandleFunc("/file/{id}/acl", s.ReadAcl).Methods(http.MethodGet)
+	s.router.HandleFunc("/acls", s.ListGroups).Methods(http.MethodGet)
+	s.router.HandleFunc("/acl/{id}", s.UpdateAcl).Methods(http.MethodPut)
+	s.router.HandleFunc("/acl/{id}", s.DeleteAcl).Methods(http.MethodDelete)
+	s.router.HandleFunc("/acl/{id}", s.ReadAcl).Methods(http.MethodGet)
 	s.router.HandleFunc("/acl", s.CreateAcl).Methods(http.MethodPost)
 }
 

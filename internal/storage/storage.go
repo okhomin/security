@@ -20,6 +20,7 @@ var (
 	ErrFileAlreadyExist  = errors.New("file already exist")
 	ErrGroupNotExist     = errors.New("group doesn't exist")
 	ErrGroupAlreadyExist = errors.New("group already exist")
+	ErrAclNotExist       = errors.New("acl doesn't exist")
 )
 
 type UserWriter interface {
@@ -31,29 +32,36 @@ type UserReader interface {
 }
 
 type FileWriter interface {
-	CreateFile(ctx context.Context, file file.File) (*file.File, error)
-	UpdateFile(ctx context.Context, file file.File) (*file.File, error)
+	Create(ctx context.Context, file file.File) (*file.File, error)
+	Update(ctx context.Context, file file.File) (*file.File, error)
+	Delete(ctx context.Context, file file.File) (*file.File, error)
 }
 
 type FileReader interface {
 	File(ctx context.Context, name string) (*file.File, error)
-	FilesInfos(ctx context.Context) ([]*file.File, error)
-	FileGroupPermissions(ctx context.Context, name, id string) (bool, bool, error)
-	FileAclPermissions(ctx context.Context, name, id string) (bool, bool, error)
+	Infos(ctx context.Context) ([]*file.File, error)
+	GroupPermissions(ctx context.Context, id, userID string) (bool, bool, error)
+	AclPermissions(ctx context.Context, id, userID string) (bool, bool, error)
 }
 
 type GroupWriter interface {
 	CreateGroup(ctx context.Context, group group.Group) (*group.Group, error)
+	DeleteGroup(ctx context.Context, id string) (*group.Group, error)
+	UpdateGroup(ctx context.Context, group group.Group) (*group.Group, error)
 }
 
 type GroupReader interface {
+	ListGroups(ctx context.Context) ([]*group.Group, error)
 	Group(ctx context.Context, name string) (*group.Group, error)
 }
 
 type AclWriter interface {
 	CreateAcl(ctx context.Context, acl acl.Acl) (*acl.Acl, error)
+	UpdateAcl(ctx context.Context, acl acl.Acl) (*acl.Acl, error)
+	DeleteAcl(ctx context.Context, id string) (*acl.Acl, error)
 }
 
 type AclReader interface {
+	ListAcls(ctx context.Context) ([]*acl.Acl, error)
 	Acl(ctx context.Context, id string) (*acl.Acl, error)
 }

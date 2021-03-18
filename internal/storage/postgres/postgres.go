@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	"github.com/okhomin/security/internal/models/acl"
-
 	"github.com/okhomin/security/internal/models/group"
 
 	"github.com/okhomin/security/internal/models/file"
@@ -54,23 +52,6 @@ func migrateDatabase(ctx context.Context, conn *pgx.Conn) error {
 		return err
 	}
 	return nil
-}
-
-const createGroupQuery = `
-INSERT INTO groups (name, read, write, users) VALUES ($1, $2, $3, $4)
-ON CONFLICT DO NOTHING RETURNING id, name, read, write, users;
-`
-
-func (p *Postgres) CreateGroup(ctx context.Context, g group.Group) (*group.Group, error) {
-	result := new(group.Group)
-	if err := p.db.QueryRow(ctx, createGroupQuery, g.Name, g.Read, g.Write, g.Users).Scan(&result.ID, &result.Name, &result.Read, &result.Write, &result.Users); err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, storage.ErrGroupAlreadyExist
-		}
-		return nil, err
-	}
-
-	return result, nil
 }
 
 const getGroupQuery = `
@@ -164,7 +145,7 @@ EXISTS (SELECT 1 FROM files AS f WHERE g.id = ANY (f.groups) AND f.id = $1)
 AND $2 = any (g.users);
 `
 
-func (p *Postgres) FileGroupPermissions(ctx context.Context, id, userID string) (bool, bool, error) {
+func (p *Postgres) GroupPermissions(ctx context.Context, id, userID string) (bool, bool, error) {
 	var read, write bool
 
 	tx, err := p.db.Begin(ctx)
@@ -205,7 +186,7 @@ EXISTS (SELECT 1 FROM files AS f WHERE a.id = ANY (f.acls) AND f.id = $1)
 AND a.user_id = $2;
 `
 
-func (p *Postgres) FileAclPermissions(ctx context.Context, id, userID string) (bool, bool, error) {
+func (p *Postgres) AclPermissions(ctx context.Context, id, userID string) (bool, bool, error) {
 	var read, write bool
 
 	tx, err := p.db.Begin(ctx)
@@ -240,25 +221,11 @@ func (p *Postgres) FileAclPermissions(ctx context.Context, id, userID string) (b
 	return read, write, nil
 }
 
-const createAclQuery = `
-INSERT INTO acls (user_id, read, write) VALUES ($1, $2, $3)
-ON CONFLICT DO NOTHING RETURNING id, user_id, read, write;
-`
-
-func (p *Postgres) CreateAcl(ctx context.Context, userID string, read, write bool) (*acl.Acl, error) {
-	result := new(acl.Acl)
-	if err := p.db.QueryRow(ctx, createAclQuery, userID, read, write).Scan(&result.ID, &result.UserID, &result.Read, &result.Write); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 const infosFilesQuery = `
 SELECT id, name, groups, acls FROM files;
 `
 
-func (p *Postgres) FilesInfos(ctx context.Context) ([]*file.File, error) {
+func (p *Postgres) Infos(ctx context.Context) ([]*file.File, error) {
 	result := make([]*file.File, 0, 10)
 	rows, err := p.db.Query(ctx, infosFilesQuery)
 	if err != nil {
@@ -282,7 +249,7 @@ INSERT INTO files (name, content, groups, acls) VALUES ($1, $2, $3, $4)
 ON CONFLICT DO NOTHING RETURNING id, name, content, groups, acls;
 `
 
-func (p *Postgres) CreateFile(ctx context.Context, f file.File) (*file.File, error) {
+func (p *Postgres) Create(ctx context.Context, f file.File) (*file.File, error) {
 	result := new(file.File)
 	if err := p.db.QueryRow(ctx, createFileQuery, f.Name, f.Content, f.Groups, f.Acls).Scan(&result.ID, &result.Name, &result.Content, &result.Groups, &result.Acls); err != nil {
 		if err == pgx.ErrNoRows {
@@ -298,7 +265,7 @@ const updateFileQuery = `
 UPDATE files SET name = $1, content = $2, groups = $3, acls = $4 WHERE id = $5;
 `
 
-func (p *Postgres) UpdateFile(ctx context.Context, f file.File) (*file.File, error) {
+func (p *Postgres) Update(ctx context.Context, f file.File) (*file.File, error) {
 	if _, err := p.db.Query(ctx, updateFileQuery, f.Name, f.Content, f.Groups, f.Acls, f.ID); err != nil {
 		return nil, err
 	}
