@@ -11,6 +11,21 @@ import (
 	"github.com/okhomin/security/internal/models/acl"
 )
 
+func (s *Server) ListAcls(w http.ResponseWriter, r *http.Request) {
+	encoder := json.NewEncoder(w)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	acls, err := s.acler.List(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := encoder.Encode(acls); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func (s *Server) CreateAcl(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	encoder := json.NewEncoder(w)

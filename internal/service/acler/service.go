@@ -24,11 +24,11 @@ func (s *Service) List(ctx context.Context) ([]*acl.Acl, error) {
 }
 
 func (s *Service) Create(ctx context.Context, acl acl.Acl) (*acl.Acl, error) {
-	return s.Create(ctx, acl)
+	return s.writer.CreateAcl(ctx, acl)
 }
 
 func (s *Service) Update(ctx context.Context, acl acl.Acl) (*acl.Acl, error) {
-	return s.Update(ctx, acl)
+	return s.writer.UpdateAcl(ctx, acl)
 }
 
 func (s *Service) Read(ctx context.Context, id string) (*acl.Acl, error) {

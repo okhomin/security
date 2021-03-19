@@ -15,7 +15,7 @@ ON CONFLICT DO NOTHING RETURNING id;
 `
 
 func (p *Postgres) CreateAcl(ctx context.Context, a acl.Acl) (*acl.Acl, error) {
-	if err := p.db.QueryRow(ctx, a.UserID, a.Read, a.Write).Scan(&a.ID); err != nil {
+	if err := p.db.QueryRow(ctx, createAclQuery, a.UserID, a.Read, a.Write).Scan(&a.ID); err != nil {
 		return nil, err
 	}
 
@@ -27,7 +27,7 @@ UPDATE acls SET user_id = $1, read = $2, write = $3 WHERE id = $4;
 `
 
 func (p *Postgres) UpdateAcl(ctx context.Context, acl acl.Acl) (*acl.Acl, error) {
-	if tag, err := p.db.Exec(ctx, acl.UserID, acl.Read, acl.Write, acl.ID); err != nil {
+	if tag, err := p.db.Exec(ctx, updateAclQuery, acl.UserID, acl.Read, acl.Write, acl.ID); err != nil {
 		return nil, err
 	} else if tag.RowsAffected() == 0 {
 		return nil, storage.ErrAclNotExist
@@ -42,7 +42,7 @@ DELETE FROM acls WHERE id = $1 RETURNING id, user_id, read, write;
 
 func (p *Postgres) DeleteAcl(ctx context.Context, id string) (*acl.Acl, error) {
 	result := new(acl.Acl)
-	if err := p.db.QueryRow(ctx, deleteGroupQuery, id).Scan(&result.ID, &result.UserID, &result.Read, &result.Write); err != nil {
+	if err := p.db.QueryRow(ctx, deleteAclQuery, id).Scan(&result.ID, &result.UserID, &result.Read, &result.Write); err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, storage.ErrAclNotExist
 		}

@@ -46,7 +46,7 @@ func (s *Server) Setup() {
 	s.router.HandleFunc("/signup", s.Signup).Methods(http.MethodPost)
 
 	userSubRouter := s.router.NewRoute().Subrouter()
-	userSubRouter.Use(func(handler http.Handler) http.Handler {
+	userSubRouter.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenStrings := strings.Split(r.Header.Get("Authorization"), " ")
 			if len(tokenStrings) != 2 {
@@ -68,6 +68,7 @@ func (s *Server) Setup() {
 				return
 			}
 			r.WithContext(context.WithValue(r.Context(), "user_id", claims.UserID))
+			next.ServeHTTP(w, r)
 		})
 	})
 
@@ -78,7 +79,7 @@ func (s *Server) Setup() {
 	userSubRouter.HandleFunc("/file", s.CreateFile).Methods(http.MethodPost)
 
 	rootSubRouter := s.router.NewRoute().Subrouter()
-	rootSubRouter.Use(func(handler http.Handler) http.Handler {
+	rootSubRouter.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenStrings := strings.Split(r.Header.Get("Authorization"), " ")
 			if len(tokenStrings) != 2 {
@@ -103,6 +104,7 @@ func (s *Server) Setup() {
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
+			next.ServeHTTP(w, r)
 		})
 	})
 
@@ -112,7 +114,7 @@ func (s *Server) Setup() {
 	rootSubRouter.HandleFunc("/group/{id}", s.UpdateGroup).Methods(http.MethodPut)
 	rootSubRouter.HandleFunc("/group", s.CreateGroup).Methods(http.MethodPost)
 
-	rootSubRouter.HandleFunc("/acls", s.ListGroups).Methods(http.MethodGet)
+	rootSubRouter.HandleFunc("/acls", s.ListAcls).Methods(http.MethodGet)
 	rootSubRouter.HandleFunc("/acl/{id}", s.UpdateAcl).Methods(http.MethodPut)
 	rootSubRouter.HandleFunc("/acl/{id}", s.DeleteAcl).Methods(http.MethodDelete)
 	rootSubRouter.HandleFunc("/acl/{id}", s.ReadAcl).Methods(http.MethodGet)
