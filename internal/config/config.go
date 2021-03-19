@@ -1,5 +1,7 @@
 package config
 
 type Config struct {
-	Port string
+	Port      string
+	JWTKey    string
+	RootLogin string
 }

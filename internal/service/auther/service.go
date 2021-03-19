@@ -2,17 +2,11 @@ package auther
 
 import (
 	"context"
-	"errors"
 
 	"github.com/okhomin/security/internal/models/user"
 
 	"github.com/okhomin/security/internal/hash"
 	"github.com/okhomin/security/internal/storage"
-)
-
-var (
-	ErrInvalidLoginOrPassword = errors.New("invalid login or password")
-	ErrAlreadyExist           = errors.New("user already exist")
 )
 
 type Service struct {

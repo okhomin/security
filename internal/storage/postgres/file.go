@@ -134,7 +134,7 @@ INSERT INTO files (name, content, groups, acls) VALUES ($1, $2, $3, $4)
 ON CONFLICT DO NOTHING RETURNING id, name, content, groups, acls;
 `
 
-func (p *Postgres) CreateFile(ctx context.Context, f file.File) (*file.File, error) {
+func (p *Postgres) CreateFile(ctx context.Context, userID string, f file.File) (*file.File, error) {
 	result := new(file.File)
 	if err := p.db.QueryRow(ctx, createFileQuery, f.Name, f.Content, f.Groups, f.Acls).Scan(&result.ID, &result.Name, &result.Content, &result.Groups, &result.Acls); err != nil {
 		if err == pgx.ErrNoRows {

@@ -32,7 +32,7 @@ type UserReader interface {
 }
 
 type FileWriter interface {
-	CreateFile(ctx context.Context, file file.File) (*file.File, error)
+	CreateFile(ctx context.Context, userID string, file file.File) (*file.File, error)
 	UpdateFile(ctx context.Context, file file.File) (*file.File, error)
 	DeleteFile(ctx context.Context, id string) (*file.File, error)
 }

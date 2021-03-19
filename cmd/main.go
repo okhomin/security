@@ -30,8 +30,13 @@ func main() {
 	autherSvc := auther.New(hasher, db, db)
 	aclerSvc := acler.New(db, db)
 	grouperSvc := grouper.New(db, db)
+	cfg := config.Config{
+		Port:      "8888",
+		JWTKey:    "hello",
+		RootLogin: "root",
+	}
 	filerSvc := filer.New(db, db)
-	srv := server.New(autherSvc, aclerSvc, filerSvc, grouperSvc)
+	srv := server.New(cfg, autherSvc, aclerSvc, filerSvc, grouperSvc)
 	srv.Setup()
-	srv.Run(config.Config{Port: "8888"})
+	srv.Run()
 }
