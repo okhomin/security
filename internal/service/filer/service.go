@@ -23,8 +23,15 @@ func (s *Service) List(ctx context.Context) ([]*file.File, error) {
 	return s.reader.InfosFiles(ctx)
 }
 
-func (s *Service) Create(ctx context.Context, userID string, file file.File) (*file.File, error) {
-	return s.writer.CreateFile(ctx, userID, file)
+func (s *Service) Create(ctx context.Context, file file.File) (*file.File, error) {
+	if createdFile, err := s.writer.CreateFile(ctx, file); err != nil {
+		if err == storage.ErrFileAlreadyExist {
+			return nil, ErrFileAlreadyExist
+		}
+		return nil, err
+	} else {
+		return createdFile, nil
+	}
 }
 
 func (s *Service) Update(ctx context.Context, userID string, file file.File) (*file.File, error) {
