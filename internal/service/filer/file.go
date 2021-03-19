@@ -10,6 +10,7 @@ import (
 var (
 	ErrPermissionDenied = errors.New("permission denied")
 	ErrFileAlreadyExist = errors.New("file with such name already exist")
+	ErrFileNotExist     = errors.New("file doesn't exist")
 )
 
 type Filer interface {

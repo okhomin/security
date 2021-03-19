@@ -36,11 +36,17 @@ func (s *Service) Create(ctx context.Context, file file.File) (*file.File, error
 
 func (s *Service) Update(ctx context.Context, userID string, file file.File) (*file.File, error) {
 	_, writeGroup, err := s.reader.GroupPermissionsFile(ctx, file.ID, userID)
+	if err == storage.ErrFileNotExist {
+		return nil, ErrFileNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	_, writeAcl, err := s.reader.AclPermissionsFile(ctx, file.ID, userID)
+	if err == storage.ErrFileNotExist {
+		return nil, ErrFileNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +59,17 @@ func (s *Service) Update(ctx context.Context, userID string, file file.File) (*f
 
 func (s *Service) Read(ctx context.Context, userID, id string) (*file.File, error) {
 	readGroup, _, err := s.reader.GroupPermissionsFile(ctx, id, userID)
+	if err == storage.ErrFileNotExist {
+		return nil, ErrFileNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	readAcl, _, err := s.reader.AclPermissionsFile(ctx, id, userID)
+	if err == storage.ErrFileNotExist {
+		return nil, ErrFileNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -69,11 +81,17 @@ func (s *Service) Read(ctx context.Context, userID, id string) (*file.File, erro
 
 func (s *Service) Delete(ctx context.Context, userID, id string) (*file.File, error) {
 	_, writeGroup, err := s.reader.GroupPermissionsFile(ctx, id, userID)
+	if err == storage.ErrFileNotExist {
+		return nil, ErrFileNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	_, writeAcl, err := s.reader.AclPermissionsFile(ctx, id, userID)
+	if err == storage.ErrFileNotExist {
+		return nil, ErrFileNotExist
+	}
 	if err != nil {
 		return nil, err
 	}
