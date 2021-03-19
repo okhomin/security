@@ -32,16 +32,16 @@ type UserReader interface {
 }
 
 type FileWriter interface {
-	Create(ctx context.Context, file file.File) (*file.File, error)
-	Update(ctx context.Context, file file.File) (*file.File, error)
-	Delete(ctx context.Context, file file.File) (*file.File, error)
+	CreateFile(ctx context.Context, file file.File) (*file.File, error)
+	UpdateFile(ctx context.Context, file file.File) (*file.File, error)
+	DeleteFile(ctx context.Context, id string) (*file.File, error)
 }
 
 type FileReader interface {
-	File(ctx context.Context, name string) (*file.File, error)
-	Infos(ctx context.Context) ([]*file.File, error)
-	GroupPermissions(ctx context.Context, id, userID string) (bool, bool, error)
-	AclPermissions(ctx context.Context, id, userID string) (bool, bool, error)
+	File(ctx context.Context, id string) (*file.File, error)
+	InfosFiles(ctx context.Context) ([]*file.File, error)
+	GroupPermissionsFile(ctx context.Context, id, userID string) (bool, bool, error)
+	AclPermissionsFile(ctx context.Context, id, userID string) (bool, bool, error)
 }
 
 type GroupWriter interface {
@@ -52,7 +52,7 @@ type GroupWriter interface {
 
 type GroupReader interface {
 	ListGroups(ctx context.Context) ([]*group.Group, error)
-	Group(ctx context.Context, name string) (*group.Group, error)
+	Group(ctx context.Context, id string) (*group.Group, error)
 }
 
 type AclWriter interface {

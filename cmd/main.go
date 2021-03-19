@@ -3,6 +3,13 @@ package main
 import (
 	"context"
 
+	"github.com/okhomin/security/internal/config"
+	"github.com/okhomin/security/internal/server"
+
+	"github.com/okhomin/security/internal/service/filer"
+
+	"github.com/okhomin/security/internal/service/grouper"
+
 	"github.com/okhomin/security/internal/service/acler"
 
 	"github.com/okhomin/security/internal/hash/bcrypt"
@@ -22,4 +29,9 @@ func main() {
 	hasher := bcrypt.New([]byte(pepper), cost)
 	autherSvc := auther.New(hasher, db, db)
 	aclerSvc := acler.New(db, db)
+	grouperSvc := grouper.New(db, db)
+	filerSvc := filer.New(db, db)
+	srv := server.New(autherSvc, aclerSvc, filerSvc, grouperSvc)
+	srv.Setup()
+	srv.Run(config.Config{Port: "8888"})
 }

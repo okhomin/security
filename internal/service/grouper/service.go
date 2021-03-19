@@ -20,21 +20,21 @@ func New(writer storage.GroupWriter, reader storage.GroupReader) *Service {
 }
 
 func (s *Service) List(ctx context.Context) ([]*group.Group, error) {
-	panic("implement me")
+	return s.reader.ListGroups(ctx)
 }
 
 func (s *Service) CreateGroup(ctx context.Context, group group.Group) (*group.Group, error) {
-	panic("implement me")
+	return s.CreateGroup(ctx, group)
 }
 
 func (s *Service) UpdateGroup(ctx context.Context, group group.Group) (*group.Group, error) {
-	panic("implement me")
+	return s.UpdateGroup(ctx, group)
 }
 
 func (s *Service) Read(ctx context.Context, id string) (*group.Group, error) {
-	panic("implement me")
+	return s.Read(ctx, id)
 }
 
 func (s *Service) DeleteGroup(ctx context.Context, id string) (*group.Group, error) {
-	panic("implement me")
+	return s.DeleteGroup(ctx, id)
 }

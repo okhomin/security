@@ -20,21 +20,21 @@ func New(writer storage.AclWriter, reader storage.AclReader) *Service {
 }
 
 func (s *Service) List(ctx context.Context) ([]*acl.Acl, error) {
-	panic("implement me")
+	return s.reader.ListAcls(ctx)
 }
 
 func (s *Service) Create(ctx context.Context, acl acl.Acl) (*acl.Acl, error) {
-	panic("implement me")
+	return s.Create(ctx, acl)
 }
 
 func (s *Service) Update(ctx context.Context, acl acl.Acl) (*acl.Acl, error) {
-	panic("implement me")
+	return s.Update(ctx, acl)
 }
 
 func (s *Service) Read(ctx context.Context, id string) (*acl.Acl, error) {
-	panic("implement me")
+	return s.reader.Acl(ctx, id)
 }
 
 func (s *Service) Delete(ctx context.Context, id string) (*acl.Acl, error) {
-	panic("implement me")
+	return s.writer.DeleteAcl(ctx, id)
 }

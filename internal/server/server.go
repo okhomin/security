@@ -9,19 +9,30 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/okhomin/security/internal/service/acler"
+	"github.com/okhomin/security/internal/service/filer"
+	"github.com/okhomin/security/internal/service/grouper"
+
 	"github.com/gorilla/mux"
 	"github.com/okhomin/security/internal/config"
 	"github.com/okhomin/security/internal/service/auther"
 )
 
 type Server struct {
-	router *mux.Router
-	auther auther.Auther
+	router  *mux.Router
+	auther  auther.Auther
+	acler   acler.Acler
+	filer   filer.Filer
+	grouper grouper.Grouper
 }
 
-func New(auther auther.Auther) *Server {
+func New(auther auther.Auther, acler acler.Acler, filer filer.Filer, grouper grouper.Grouper) *Server {
 	return &Server{
-		auther: auther,
+		auther:  auther,
+		acler:   acler,
+		filer:   filer,
+		grouper: grouper,
+		router:  mux.NewRouter(),
 	}
 }
 

@@ -78,14 +78,16 @@ func (p *Postgres) ListAcls(ctx context.Context) ([]*acl.Acl, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		r := new(acl.Acl)
-		if err := rows.Scan(r.ID, r.UserID, r.Read, r.Write); err != nil {
+		if err := rows.Scan(&r.ID, &r.UserID, &r.Read, &r.Write); err != nil {
 			return nil, err
 		}
 
 		result = append(result, r)
 	}
+
 	return result, nil
 }
