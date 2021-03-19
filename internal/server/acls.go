@@ -59,11 +59,11 @@ func (s *Server) UpdateAcl(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if createdAcl, err := s.acler.Update(ctx, *newAcl); err != nil {
+	if updatedAcl, err := s.acler.Update(ctx, *newAcl); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	} else {
-		if err := encoder.Encode(createdAcl); err != nil {
+		if err := encoder.Encode(updatedAcl); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -75,11 +75,11 @@ func (s *Server) ReadAcl(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if createdAcl, err := s.acler.Read(ctx, mux.Vars(r)["id"]); err != nil {
+	if readAcl, err := s.acler.Read(ctx, mux.Vars(r)["id"]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	} else {
-		if err := encoder.Encode(createdAcl); err != nil {
+		if err := encoder.Encode(readAcl); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -91,11 +91,11 @@ func (s *Server) DeleteAcl(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if createdAcl, err := s.acler.Delete(ctx, mux.Vars(r)["id"]); err != nil {
+	if deletedAcl, err := s.acler.Delete(ctx, mux.Vars(r)["id"]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	} else {
-		if err := encoder.Encode(createdAcl); err != nil {
+		if err := encoder.Encode(deletedAcl); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

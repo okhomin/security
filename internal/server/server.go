@@ -67,8 +67,7 @@ func (s *Server) Setup() {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
-			r.WithContext(context.WithValue(r.Context(), "user_id", claims.UserID))
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "user_id", claims.UserID)))
 		})
 	})
 

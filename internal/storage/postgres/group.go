@@ -54,7 +54,7 @@ func (p *Postgres) DeleteGroup(ctx context.Context, id string) (*group.Group, er
 		return nil, err
 	}
 
-	return nil, nil
+	return result, nil
 }
 
 const updateGroupQuery = `
@@ -62,7 +62,7 @@ UPDATE groups SET name = $1, read = $2, write = $3, users = $4 WHERE id = $5;
 `
 
 func (p *Postgres) UpdateGroup(ctx context.Context, g group.Group) (*group.Group, error) {
-	if tag, err := p.db.Exec(ctx, updateFileQuery, g.Name, g.Read, g.Write, g.Users); err != nil {
+	if tag, err := p.db.Exec(ctx, updateGroupQuery, g.Name, g.Read, g.Write, g.Users, g.ID); err != nil {
 		return nil, err
 	} else if tag.RowsAffected() == 0 {
 		return nil, storage.ErrGroupNotExist
