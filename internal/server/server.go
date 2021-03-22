@@ -107,13 +107,13 @@ func (s *Server) Setup() {
 		})
 	})
 
-	rootSubRouter.HandleFunc("/groups", s.ListGroups).Methods(http.MethodGet)
+	userSubRouter.HandleFunc("/groups", s.ListGroups).Methods(http.MethodGet)
 	rootSubRouter.HandleFunc("/group/{id}", s.DeleteGroup).Methods(http.MethodDelete)
 	rootSubRouter.HandleFunc("/group/{id}", s.ReadGroup).Methods(http.MethodGet)
 	rootSubRouter.HandleFunc("/group/{id}", s.UpdateGroup).Methods(http.MethodPut)
 	rootSubRouter.HandleFunc("/group", s.CreateGroup).Methods(http.MethodPost)
 
-	rootSubRouter.HandleFunc("/acls", s.ListAcls).Methods(http.MethodGet)
+	userSubRouter.HandleFunc("/acls", s.ListAcls).Methods(http.MethodGet)
 	rootSubRouter.HandleFunc("/acl/{id}", s.UpdateAcl).Methods(http.MethodPut)
 	rootSubRouter.HandleFunc("/acl/{id}", s.DeleteAcl).Methods(http.MethodDelete)
 	rootSubRouter.HandleFunc("/acl/{id}", s.ReadAcl).Methods(http.MethodGet)
